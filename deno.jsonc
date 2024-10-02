@@ -1,6 +1,6 @@
 {
   "name": "@5t111111/fresh-session",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "exports": "./mod.ts",
   "tasks": {
     "dev": "deno test --watch"
@@ -11,5 +11,19 @@
     "@std/testing": "jsr:@std/testing@1",
     // NOTE: preact import maps are needed to avoid import error when importing fresh modules
     "preact": "npm:preact@10.19.6"
+  },
+  "publish": {
+    "include": [
+      "LICENSE",
+      "README.md",
+      "deno.jsonc",
+      "deno.lock",
+      "mod.ts",
+      "deps.ts",
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "src/**/*_test.ts"
+    ]
   }
 }
