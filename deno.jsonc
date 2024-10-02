@@ -1,6 +1,6 @@
 {
   "name": "@5t111111/fresh-session",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "exports": "./mod.ts",
   "tasks": {
     "dev": "deno test --watch"

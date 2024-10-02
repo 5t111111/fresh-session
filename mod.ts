@@ -25,3 +25,5 @@
  * ```
  */
 export { sessionPlugin } from "./src/plugin.ts";
+
+export { Session } from "./src/session.ts";
