@@ -37,3 +37,12 @@ export default defineConfig({
   ],
 });
 ```
+
+## Contributing
+
+If you would like to contribute to the development, you can run unit tests as
+described below, so please make sure there are no regressions.
+
+```shell
+deno task dev
+```
