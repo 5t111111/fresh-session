@@ -4,39 +4,50 @@ import type { CookieOptions } from "./middleware.ts";
 import type { SessionObject } from "./session.ts";
 
 /**
- * Cookie store options
+ * Options for configuring the CookieStore.
  */
-type CookieStoreOptions = {
+interface CookieStoreOptions {
+  /**
+   * The key used to encrypt the session cookie value.
+   */
   encryptionKey: string;
+
+  /**
+   * Options for configuring the session cookie.
+   */
   cookieOptions?: CookieOptions;
+
+  /**
+   * The name of the session cookie. Defaults to "session" if not provided.
+   */
   sessionCookieName?: string;
-};
+}
 
 /**
- * Cookie based session store class
+ * Cookie based session store class.
  */
 export class CookieStore {
   /**
-   * Encryption key
+   * The key used to encrypt the session cookie value.
    */
   public readonly encryptionKey: string;
 
   /**
-   * Cookie options
+   * Options for configuring the session cookie.
    */
   public readonly cookieOptions: CookieOptions | undefined;
 
   /**
-   * Session cookie name
+   * The name of the session cookie. Defaults to "session" if not provided.
    */
   public readonly sessionCookieName: string;
 
   /**
-   * Constructor
+   * Constructor for the CookieStore class.
    *
-   * if sessionCookieName is not provided, it will default to "session"
+   * If sessionCookieName is not provided, it will default to "session".
    *
-   * @param options
+   * @param options Options to configure the CookieStore.
    */
   constructor(options: CookieStoreOptions) {
     this.encryptionKey = options.encryptionKey;
@@ -51,13 +62,13 @@ export class CookieStore {
    * @returns Session object or null when something goes wrong
    */
   async getSession(req: Request): Promise<SessionObject | null> {
-    // Get cookies from request headers
+    // Get cookies from request headers.
     const cookies = getCookies(req.headers);
 
-    // Get session cookie from cookies
+    // Get session cookie from cookies.
     const sessionCookie = cookies[this.sessionCookieName];
 
-    // Return null when session cookie does not exist
+    // Return null when session cookie does not exist.
     if (!sessionCookie) {
       return null;
     }
@@ -68,7 +79,7 @@ export class CookieStore {
       sessionDataRaw =
         (await decrypt(this.encryptionKey, sessionCookie)) as string;
     } catch {
-      // Return null when decryption fails
+      // Return null when decryption fails.
       return null;
     }
 
@@ -77,7 +88,7 @@ export class CookieStore {
     try {
       sessionObject = JSON.parse(sessionDataRaw) as SessionObject;
     } catch {
-      // Return null when JSON parse fails
+      // Return null when JSON parse fails.
       return null;
     }
 
@@ -85,14 +96,16 @@ export class CookieStore {
   }
 
   /**
-   * Create a set-cookie header with session data
+   * Get session data from cookies in the request.
    *
-   * @param headers Headers object to add set-cookie header
-   * @param sessionObject Session object to be stored in the cookie
-   * @returns Headers object with set-cookie header
+   * @param  req The request object to get cookies from.
+   * @returns The session object or null if something goes wrong.
    */
-  async createSetCookieHeader(headers: Headers, sessionObject: SessionObject) {
-    // Serialize session object into a string
+  async createSetCookieHeader(
+    headers: Headers,
+    sessionObject: SessionObject,
+  ): Promise<Headers> {
+    // Serialize session object into a string.
     const serialized = JSON.stringify(sessionObject);
 
     const cookie: Cookie = {
@@ -101,7 +114,7 @@ export class CookieStore {
       ...this.cookieOptions,
     };
 
-    // Modify headers with set-cookie header
+    // Modify headers with set-cookie header.
     setCookie(headers, cookie);
 
     return headers;

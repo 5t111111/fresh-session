@@ -2,10 +2,11 @@ import type { MiddlewareHandler, Plugin } from "../deps.ts";
 import { sessionMiddleware, type SessionOptions } from "./middleware.ts";
 
 /**
- * Plugin for session management
+ * Fresh Session Plugin
+ * Creates a session plugin with the specified options.
  *
- * @param options
- * @returns Plugin object
+ * @param options The options to configure the session middleware.
+ * @returns The configured session plugin.
  */
 export const sessionPlugin = (
   options: SessionOptions,

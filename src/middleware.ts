@@ -3,38 +3,65 @@ import { Session } from "./session.ts";
 import { CookieStore } from "./cookie_store.ts";
 
 /**
- * Cookie options
+ * Options for configuring cookies used in session management.
+ *
+ * This type omits the `name` and `value` properties from the @std/http `Cookie` type,
+ * as these are managed internally by the session middleware.
+ *
+ * @see {@link https://jsr.io/@std/http/doc/cookie/~/Cookie}
  */
 export type CookieOptions = Omit<Cookie, "name" | "value">;
 
 /**
- * Session options
+ * Options for configuring the session middleware.
  */
-export type SessionOptions = {
+export interface SessionOptions {
+  /**
+   * The key used to encrypt session data.
+   */
   encryptionKey: string;
+
+  /**
+   * The number of seconds after which the session should expire. If not provided, the session does not expire.
+   */
   expireAfterSeconds?: number;
+
+  /**
+   * Options for configuring the session cookie.
+   */
   cookieOptions?: CookieOptions;
+
+  /**
+   * The name of the session cookie. Defaults to a standard name if not provided.
+   */
   sessionCookieName?: string;
-};
+}
 
 /**
- * Customized state for the plugin middleware
+ * Custom State includes the session instance associated with the current request.
  */
-export type PluginMiddlewareState = {
+export interface PluginMiddlewareState {
   session: Session;
-};
+}
 
 /**
- * Middleware for session management
+ * Middleware for session management.
  *
- * @param options Options to configure the session middleware handler
- * @returns Middleware handler
+ * @param options Options to configure the session middleware handler.
+ * @returns Middleware handler.
  */
 export const sessionMiddleware = (options: SessionOptions) => {
   /**
-   * Middleware handler
+   * Middleware handler.
+   *
+   * @param req The incoming request object.
+   * @param ctx The context object containing state and other information.
+   * @returns The response object.
    */
-  return async (req: Request, ctx: FreshContext<PluginMiddlewareState>) => {
+  const handler = async (
+    req: Request,
+    ctx: FreshContext<PluginMiddlewareState>,
+  ): Promise<Response> => {
     if (ctx.destination !== "route") {
       return await ctx.next();
     }
@@ -52,17 +79,17 @@ export const sessionMiddleware = (options: SessionOptions) => {
       );
     }
 
-    // Create a new cookie store instance
+    // Create a new cookie store instance.
     const store = new CookieStore({
       encryptionKey,
       cookieOptions,
       sessionCookieName,
     });
 
-    // Create a new session instance with the empty session object
+    // Create a new session instance with the empty session object.
     const session = new Session();
 
-    // Get session object from the request
+    // Get session object from the request.
     const sessionObject = await store.getSession(req);
 
     if (sessionObject) {
@@ -77,23 +104,25 @@ export const sessionMiddleware = (options: SessionOptions) => {
       session.reset(expireAfterSeconds);
     }
 
-    // Set session in the context state
+    // Set session in the context state.
     ctx.state.session = session;
 
-    // Call the next handler
+    // Call the next handler.
     const resp = await ctx.next();
 
-    // Create set-cookie header
+    // Create set-cookie header.
     const headers = await store.createSetCookieHeader(
       new Headers(),
       session.getSessionObject(),
     );
 
-    // Append constructed set-cookie headers to the response headers
+    // Append constructed set-cookie headers to the response headers.
     headers.forEach((value, key) => {
       resp.headers.set(key, value);
     });
 
     return resp;
   };
+
+  return handler;
 };
