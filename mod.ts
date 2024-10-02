@@ -11,7 +11,7 @@
  * export default defineConfig({
  *   plugins: [
  *     sessionPlugin({
- *       // Key must be at least 32 characters required.
+ *       // Key must be at least 32 characters long.
  *       encryptionKey: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
  *       // Optional, the session does not expire if not provided.
  *       expireAfterSeconds: 3600,
