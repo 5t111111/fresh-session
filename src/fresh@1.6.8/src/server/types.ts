@@ -6,6 +6,47 @@
  * single file, and commit them to source control.
  */
 
+// =============================================================================
+// MODIFICATIONS START
+// =============================================================================
+// import { ComponentChildren, ComponentType, VNode } from "preact";
+// import * as router from "./router.ts";
+// import { InnerRenderFunction, RenderContext } from "./render.ts";
+// import { Manifest } from "./mod.ts";
+
+// deno-lint-ignore no-explicit-any
+type ComponentChildren = any;
+// deno-lint-ignore no-explicit-any
+type ComponentType<T> = any;
+// deno-lint-ignore no-explicit-any
+type VNode<T> = any;
+
+export type KnownMethod = typeof knownMethods[number];
+
+export const knownMethods = [
+  "GET",
+  "HEAD",
+  "POST",
+  "PUT",
+  "DELETE",
+  "OPTIONS",
+  "PATCH",
+] as const;
+
+type RouterKnownMethod = KnownMethod;
+type RouterDestinationKind = "internal" | "static" | "route" | "notFound";
+
+// deno-lint-ignore no-explicit-any
+type InnerRenderFunction = any;
+// deno-lint-ignore no-explicit-any
+type RenderContext = any;
+
+// deno-lint-ignore no-explicit-any
+type Manifest = any;
+// =============================================================================
+// MODIFICATIONS END
+// =============================================================================
+
 export interface DenoConfig {
   imports?: Record<string, string>;
   importMap?: string;
@@ -40,8 +81,7 @@ export interface FreshConfig {
      */
     target?: string | string[];
   };
-  // deno-lint-ignore no-explicit-any
-  render?: any;
+  render?: RenderFunction;
   plugins?: Plugin[];
   staticDir?: string;
   router?: RouterOptions;
@@ -103,8 +143,7 @@ export interface FreshConfig {
 
 export interface InternalFreshState {
   config: ResolvedFreshConfig;
-  // deno-lint-ignore no-explicit-any
-  manifest: any;
+  manifest: Manifest;
   loadSnapshot: boolean;
   didLoadSnapshot: boolean;
   denoJsonPath: string;
@@ -118,8 +157,7 @@ export interface ResolvedFreshConfig {
     outDir: string;
     target: string | string[];
   };
-  // deno-lint-ignore no-explicit-any
-  render: any;
+  render: RenderFunction;
   plugins: Plugin[];
   staticDir: string;
   router?: RouterOptions;
@@ -149,6 +187,11 @@ export interface RouterOptions {
    */
   basePath?: string;
 }
+
+export type RenderFunction = (
+  ctx: RenderContext,
+  render: InnerRenderFunction,
+) => void | Promise<void>;
 
 /// --- ROUTES ---
 
@@ -188,7 +231,14 @@ export interface FreshContext<
   route: string;
   /** @deprecated Use `.route` instead */
   pattern: string;
-  destination: "internal" | "static" | "route" | "notFound";
+  // =============================================================================
+  // MODIFICATIONS START
+  // =============================================================================
+  // destination: router.DestinationKind;
+  destination: RouterDestinationKind;
+  // =============================================================================
+  // MODIFICATIONS END
+  // =============================================================================
   params: Record<string, string>;
   isPartial: boolean;
   state: State;
@@ -205,6 +255,7 @@ export interface FreshContext<
     data?: Data,
     options?: RenderOptions,
   ) => Response | Promise<Response>;
+  Component: ComponentType<unknown>;
   next: () => Promise<Response>;
 }
 /**
@@ -272,22 +323,60 @@ export type Handler<T = any, State = Record<string, unknown>> = (
   ctx: FreshContext<State, T>,
 ) => Response | Promise<Response>;
 
-const knownMethods = [
-  "GET",
-  "HEAD",
-  "POST",
-  "PUT",
-  "DELETE",
-  "OPTIONS",
-  "PATCH",
-] as const;
-
-export type KnownMethod = typeof knownMethods[number];
-
 // deno-lint-ignore no-explicit-any
 export type Handlers<T = any, State = Record<string, unknown>> = {
-  [K in KnownMethod]?: Handler<T, State>;
+  // =============================================================================
+  // MODIFICATIONS START
+  // =============================================================================
+  // [K in router.KnownMethod]?: Handler<T, State>;
+  [K in RouterKnownMethod]?: Handler<T, State>;
+  // =============================================================================
+  // MODIFICATIONS END
+  // =============================================================================
 };
+
+export interface RouteModule {
+  default?: PageComponent<PageProps>;
+  // deno-lint-ignore no-explicit-any
+  handler?: Handler<any, any> | Handlers<any, any>;
+  config?: RouteConfig;
+}
+
+// deno-lint-ignore no-explicit-any
+export type AsyncRoute<T = any, S = Record<string, unknown>> = (
+  req: Request,
+  ctx: FreshContext<S, T>,
+) => Promise<ComponentChildren | Response>;
+// deno-lint-ignore no-explicit-any
+export type PageComponent<T = any, S = Record<string, unknown>> =
+  | ComponentType<PageProps<T, S>>
+  | AsyncRoute<T, S>
+  // deno-lint-ignore no-explicit-any
+  | ((props: any) => VNode<any> | ComponentChildren);
+
+// deno-lint-ignore no-explicit-any
+export interface Route<Data = any> {
+  baseRoute: BaseRoute;
+  pattern: string;
+  url: string;
+  name: string;
+  component?: PageComponent<Data> | AsyncLayout<Data> | AsyncRoute<Data>;
+  handler: Handler<Data> | Handlers<Data>;
+  csp: boolean;
+  appWrapper: boolean;
+  inheritLayouts: boolean;
+}
+
+// --- APP ---
+export interface AppModule {
+  default: ComponentType<PageProps> | AsyncLayout;
+}
+
+// deno-lint-ignore no-explicit-any
+export type AsyncLayout<T = any, S = Record<string, unknown>> = (
+  req: Request,
+  ctx: FreshContext<S, T>,
+) => Promise<ComponentChildren | Response>;
 
 export interface LayoutConfig {
   /**
@@ -300,6 +389,47 @@ export interface LayoutConfig {
    * Default: `false`
    */
   skipInheritedLayouts?: boolean;
+}
+
+export interface LayoutModule {
+  // deno-lint-ignore no-explicit-any
+  handler?: Handler<any, any> | Handlers<any, any>;
+  default: ComponentType<PageProps> | AsyncLayout;
+  config?: LayoutConfig;
+}
+
+export interface LayoutRoute {
+  baseRoute: BaseRoute;
+  // deno-lint-ignore no-explicit-any
+  handler?: Handler<any, any> | Handlers<any, any>;
+  component: LayoutModule["default"];
+  appWrapper: boolean;
+  inheritLayouts: boolean;
+}
+
+// --- UNKNOWN PAGE ---
+
+export type UnknownHandler = (
+  req: Request,
+  ctx: FreshContext,
+) => Response | Promise<Response>;
+
+export interface UnknownPageModule {
+  default?: PageComponent<PageProps>;
+  handler?: UnknownHandler;
+  config?: RouteConfig;
+}
+
+export interface UnknownPage {
+  baseRoute: BaseRoute;
+  pattern: string;
+  url: string;
+  name: string;
+  component?: PageComponent<PageProps>;
+  handler: UnknownHandler;
+  csp: boolean;
+  appWrapper: boolean;
+  inheritLayouts: boolean;
 }
 
 export type UnknownRenderFunction = (
@@ -316,6 +446,24 @@ export type ErrorHandler = (
   req: Request,
   ctx: FreshContext,
 ) => Response | Promise<Response>;
+
+export interface ErrorPageModule {
+  default?: PageComponent<PageProps>;
+  handler?: ErrorHandler;
+  config?: RouteConfig;
+}
+
+export interface ErrorPage {
+  baseRoute: BaseRoute;
+  pattern: string;
+  url: string;
+  name: string;
+  component?: PageComponent<PageProps>;
+  handler: ErrorHandler;
+  csp: boolean;
+  appWrapper: boolean;
+  inheritLayouts: boolean;
+}
 
 // --- MIDDLEWARES ---
 export interface MiddlewareRoute {
@@ -335,6 +483,21 @@ export interface MiddlewareModule<State = any> {
 
 export interface Middleware<State = Record<string, unknown>> {
   handler: MiddlewareHandler<State> | MiddlewareHandler<State>[];
+}
+
+// --- ISLANDS ---
+
+export interface IslandModule {
+  // deno-lint-ignore no-explicit-any
+  [key: string]: ComponentType<any> | unknown;
+}
+
+export interface Island {
+  id: string;
+  name: string;
+  url: string;
+  component: ComponentType<unknown>;
+  exportName: string;
 }
 
 // --- PLUGINS ---
@@ -466,6 +629,12 @@ export interface PluginMiddleware<State = Record<string, unknown>> {
 export interface PluginRoute {
   /** A path in the format of a filename path without filetype */
   path: string;
+
+  component?:
+    | ComponentType<PageProps>
+    | ComponentType<AppProps>
+    | AsyncRoute
+    | AsyncLayout;
 
   // deno-lint-ignore no-explicit-any
   handler?: Handler<any, any> | Handlers<any, any>;
