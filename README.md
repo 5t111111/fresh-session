@@ -32,7 +32,7 @@ export default defineConfig({
       // Optional; default is "session".
       sessionCookieName: "my_session",
       // Optional; see https://jsr.io/@std/http/doc/cookie/~/Cookie
-      cookieOptions: { path: "/", secure: true, SameSite: "Lax" },
+      cookieOptions: { path: "/", secure: true, sameSite: "Lax" },
     }),
   ],
 });
