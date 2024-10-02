@@ -2,7 +2,7 @@ export type {
   FreshContext,
   MiddlewareHandler,
   Plugin,
-} from "https://deno.land/x/fresh@1.6.8/server.ts";
+} from "./src/fresh@1.6.8/src/server/types.ts";
 
 export { type Cookie, getCookies, setCookie } from "jsr:@std/http@^1.0.7";
 
