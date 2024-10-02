@@ -22,7 +22,8 @@
       "jsr:@std/path@0.213": "jsr:@std/path@0.213.1",
       "jsr:@std/path@^1.0.6": "jsr:@std/path@1.0.6",
       "jsr:@std/streams@^1.0.6": "jsr:@std/streams@1.0.6",
-      "jsr:@std/testing@1": "jsr:@std/testing@1.0.3"
+      "jsr:@std/testing@1": "jsr:@std/testing@1.0.3",
+      "npm:preact@10.19.6": "npm:preact@10.19.6"
     },
     "jsr": {
       "@brc-dd/iron@1.2.1": {
@@ -114,6 +115,12 @@
           "jsr:@std/data-structures@^1.0.4",
           "jsr:@std/internal@^1.0.4"
         ]
+      }
+    },
+    "npm": {
+      "preact@10.19.6": {
+        "integrity": "sha512-gympg+T2Z1fG1unB8NH29yHJwnEaCH37Z32diPDku316OTnRPeMbiRV9kTrfZpocXjdfnWuFUl/Mj4BHaf6gnw==",
+        "dependencies": {}
       }
     }
   },
@@ -312,7 +319,8 @@
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@1",
-      "jsr:@std/testing@1"
+      "jsr:@std/testing@1",
+      "npm:preact@10.19.6"
     ]
   }
 }
