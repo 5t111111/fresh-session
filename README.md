@@ -20,7 +20,7 @@ application:
 
 ```typescript
 import { defineConfig } from "$fresh/server.ts";
-import { sessionPlugin } from "./plugins/fresh-session/mod.ts";
+import { sessionPlugin } from "@5t111111/fresh-session";
 
 export default defineConfig({
   plugins: [
