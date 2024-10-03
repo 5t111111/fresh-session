@@ -1,4 +1,5 @@
-import type { Cookie, FreshContext } from "../deps.ts";
+import type { MiddlewareFn } from "../../fresh/src/mod.ts";
+import type { Cookie } from "../deps.ts";
 import { Session } from "./session.ts";
 import { CookieStore } from "./cookie_store.ts";
 
@@ -40,7 +41,7 @@ export interface SessionOptions {
 /**
  * Custom State includes the session instance associated with the current request.
  */
-export interface PluginMiddlewareState {
+export interface SessionMiddlewareState {
   session: Session;
 }
 
@@ -50,7 +51,9 @@ export interface PluginMiddlewareState {
  * @param options Options to configure the session middleware handler.
  * @returns Middleware handler.
  */
-export const sessionMiddleware = (options: SessionOptions) => {
+export function session<State extends SessionMiddlewareState>(
+  options: SessionOptions,
+): MiddlewareFn<State> {
   /**
    * Middleware handler.
    *
@@ -58,13 +61,10 @@ export const sessionMiddleware = (options: SessionOptions) => {
    * @param ctx The context object containing state and other information.
    * @returns The response object.
    */
-  const handler = async (
-    req: Request,
-    ctx: FreshContext<PluginMiddlewareState>,
-  ): Promise<Response> => {
-    if (ctx.destination !== "route") {
-      return await ctx.next();
-    }
+  return async function handler(
+    ctx,
+  ): Promise<Response> {
+    const { req, state } = ctx;
 
     const {
       encryptionKey,
@@ -105,7 +105,7 @@ export const sessionMiddleware = (options: SessionOptions) => {
     }
 
     // Set session in the context state.
-    ctx.state.session = session;
+    state.session = session;
 
     // Call the next handler.
     const resp = await ctx.next();
@@ -123,6 +123,4 @@ export const sessionMiddleware = (options: SessionOptions) => {
 
     return resp;
   };
-
-  return handler;
-};
+}
