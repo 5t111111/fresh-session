@@ -24,6 +24,6 @@
  * });
  * ```
  */
-export { sessionPlugin } from "./src/plugin.ts";
-
+// export { sessionPlugin } from "./src/plugin.ts";
+export { session } from "./src/middleware.ts";
 export { Session } from "./src/session.ts";
