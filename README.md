@@ -1,5 +1,10 @@
 # Fresh Session
 
+> [!TIP]
+> Are you looking for a module for newly designed middleware for Fresh v2?
+> Please check the
+> [fresh-v2 branch](https://github.com/5t111111/fresh-session/tree/fresh-v2).
+
 This plugin provides a very simple session management system for your
 [Fresh](https://fresh.deno.dev/) application.
 
