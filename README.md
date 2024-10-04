@@ -1,7 +1,7 @@
 # Fresh Session
 
-This plugin provides a very simple session management system for your
-[Fresh](https://fresh.deno.dev/) application.
+This middleware provides a simple cookie-based session management system for
+your [Fresh](https://fresh.deno.dev/) application.
 
 > [!NOTE]
 > Currently, this plugin only supports cookies as the session storage. Planning
@@ -9,49 +9,56 @@ This plugin provides a very simple session management system for your
 
 ## Getting started
 
-Add the plugin to your Fresh application:
+Add the module to your Fresh application:
 
 ```shell
 deno add @5t111111/fresh-session
 ```
 
-Then, import the plugin and add it to the plugin configuration in your
-application:
+Then, import the middleware and configure your app to use it:
 
-```typescript
-import { defineConfig } from "$fresh/server.ts";
-import { sessionPlugin } from "@5t111111/fresh-session";
+```ts
+import { App } from "fresh";
+import { session } from "fresh-session";
+import type { State } from "./utils.ts";
 
-export default defineConfig({
-  plugins: [
-    sessionPlugin({
-      // Key must be at least 32 characters long.
-      encryptionKey: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-      // Optional; the session does not expire if not provided.
-      expireAfterSeconds: 3600,
-      // Optional; default is "session".
-      sessionCookieName: "my_session",
-      // Optional; see https://jsr.io/@std/http/doc/cookie/~/Cookie
-      cookieOptions: { path: "/", secure: true, sameSite: "Lax" },
-    }),
-  ],
-});
+export const app = new App<State>();
+
+app.use(session({
+  // Key must be at least 32 characters long.
+  encryptionKey: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  // Optional; the session does not expire if not provided.
+  expireAfterSeconds: 3600,
+  // Optional; default is "session".
+  sessionCookieName: "my_session",
+  // Optional; see https://jsr.io/@std/http/doc/cookie/~/Cookie
+  cookieOptions: { path: "/", secure: true, sameSite: "Lax" },
+}));
 ```
 
 The session data is stored as the state of the context. Therefore, within your
 routes, you can access it using ctx.state.session.
 
-A typical way to get a session is as follows:
+A typical way to use a session is as follows:
 
-```tsx
-// routes/profile.tsx
+**`./utils.ts`**
 
-import { Handlers, PageProps } from "$fresh/server.ts";
-import { Session } from "@5t111111/fresh-session";
+```ts
+import { createDefine } from "fresh";
+import type { Session } from "fresh-session";
 
-interface State {
+export interface State {
   session: Session;
 }
+
+export const define = createDefine<State>();
+```
+
+**`./routes/profile.tsx`**
+
+```tsx
+import { page, PageProps } from "fresh";
+import { define } from "../utils.ts";
 
 interface User {
   id: number;
@@ -62,9 +69,8 @@ interface Props {
   user: User;
 }
 
-// deno-lint-ignore no-explicit-any
-export const handler: Handlers<any, State> = {
-  GET(_req, ctx) {
+export const handler = define.handlers({
+  GET: (ctx) => {
     const session = ctx.state.session;
     const user = session.get("user") as User;
 
@@ -75,11 +81,11 @@ export const handler: Handlers<any, State> = {
       });
     }
 
-    return ctx.render({
+    return page({
       user,
     });
   },
-};
+});
 
 export default function ProfilePage({ data }: PageProps<Props>) {
   const { user } = data;
@@ -88,7 +94,8 @@ export default function ProfilePage({ data }: PageProps<Props>) {
     <main>
       <h1>Profile</h1>
       <p>
-        {user.name} profile page. You cannot visit this page before logging in.
+        {user.name}'s profile page. You cannot visit this page before sigining
+        in.
       </p>
     </main>
   );
@@ -97,11 +104,11 @@ export default function ProfilePage({ data }: PageProps<Props>) {
 
 You can also set data to the session in a similar way:
 
-```tsx
-// routes/sign_in.tsx
+**`./routes/sign_in.tsx`**
 
-import { Handlers } from "$fresh/server.ts";
-import { Session } from "@5t111111/fresh-session";
+```tsx
+import { Session } from "fresh-session";
+import { define } from "../utils.ts";
 
 interface State {
   session: Session;
@@ -112,17 +119,16 @@ interface User {
   name: string;
 }
 
-// deno-lint-ignore no-explicit-any
-export const handler: Handlers<any, State> = {
-  async POST(req, ctx) {
-    const form = await req.formData();
+export const handler = define.handlers({
+  async POST(ctx) {
+    const form = await ctx.req.formData();
     const email = form.get("email")?.toString();
     const password = form.get("password")?.toString();
 
     // Check if the user exists in the database and the password is correct...
 
     // Set the user in the session.
-    const user: User = { id: 1, name: "Alice" };
+    const user: User = { id: 1993, name: "Deno" };
     const session = ctx.state.session;
     session.set("user", user);
 
@@ -132,15 +138,17 @@ export const handler: Handlers<any, State> = {
       headers: { Location: "/profile" },
     });
   },
-};
+});
 
 export default function SignInPage() {
   return (
-    <form method="post">
-      <input type="email" name="email" value="" />
-      <input type="password" name="password" value="" />
-      <button type="submit">Sign in</button>
-    </form>
+    <main>
+      <form method="post">
+        <input type="email" name="email" value="" />
+        <input type="password" name="password" value="" />
+        <button type="submit">Sign in</button>
+      </form>
+    </main>
   );
 }
 ```

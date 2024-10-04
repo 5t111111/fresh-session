@@ -1,29 +1,28 @@
 /**
  * @module
  *
- * Fresh session plugin.
+ * Fresh middleware to add cookie-based sessions.
  *
  * @example
  * ```ts
- * import { defineConfig } from "$fresh/server.ts";
- * import { sessionPlugin } from "@5t111111/fresh-session";
+ * import { App } from "fresh";
+ * import { session } from "fresh-session";
+ * import type { State } from "./utils.ts";
  *
- * export default defineConfig({
- *   plugins: [
- *     sessionPlugin({
- *       // Key must be at least 32 characters long.
- *       encryptionKey: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
- *       // Optional, the session does not expire if not provided.
- *       expireAfterSeconds: 3600,
- *       // Optional, default is "session".
- *       sessionCookieName: "my_session",
- *       // Optional, see https://jsr.io/@std/http/doc/cookie/~/Cookie
- *       cookieOptions: { path: "/", secure: true, sameSite: "Lax" },
- *     }),
- *   ],
- * });
+ * export const app = new App<State>();
+ *
+ * app.use(session({
+ *   // Key must be at least 32 characters long.
+ *   encryptionKey: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+ *   // Optional; the session does not expire if not provided.
+ *   expireAfterSeconds: 3600,
+ *   // Optional; default is "session".
+ *   sessionCookieName: "my_session",
+ *   // Optional; see https://jsr.io/@std/http/doc/cookie/~/Cookie
+ *   cookieOptions: { path: "/", secure: true, sameSite: "Lax" },
+ * }));
  * ```
  */
-// export { sessionPlugin } from "./src/plugin.ts";
+
 export { session } from "./src/middleware.ts";
 export { Session } from "./src/session.ts";
