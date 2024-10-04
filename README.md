@@ -19,7 +19,7 @@ Then, import the middleware and configure your app to use it:
 
 ```ts
 import { App } from "fresh";
-import { session } from "fresh-session";
+import { session } from "@5t111111/fresh-session";
 import type { State } from "./utils.ts";
 
 export const app = new App<State>();
@@ -45,7 +45,7 @@ A typical way to use a session is as follows:
 
 ```ts
 import { createDefine } from "fresh";
-import type { Session } from "fresh-session";
+import type { Session } from "@5t111111/fresh-session";
 
 export interface State {
   session: Session;
@@ -107,12 +107,8 @@ You can also set data to the session in a similar way:
 **`./routes/sign_in.tsx`**
 
 ```tsx
-import { Session } from "fresh-session";
+import { Session } from "@5t111111/fresh-session";
 import { define } from "../utils.ts";
-
-interface State {
-  session: Session;
-}
 
 interface User {
   id: number;
