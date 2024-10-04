@@ -118,7 +118,7 @@ export const sessionMiddleware = (options: SessionOptions) => {
 
     // Append constructed set-cookie headers to the response headers.
     headers.forEach((value, key) => {
-      resp.headers.set(key, value);
+      resp.headers.append(key, value);
     });
 
     return resp;

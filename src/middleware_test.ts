@@ -255,7 +255,7 @@ describe("sessionMiddleware", () => {
             headers: new Headers([
               ["key1", "value1"],
               ["key2", "value2"],
-              ["set-cookie", "dummy=this_will_be_overwritten"],
+              ["set-cookie", "othercookie=somevalue"],
             ]),
           }),
       });
@@ -265,7 +265,10 @@ describe("sessionMiddleware", () => {
       assert(result.headers.has("key2"));
       assertEquals(result.headers.get("key2"), "value2");
       assert(result.headers.has("set-cookie"));
-      assertMatch(result.headers.get("set-cookie") as string, /^session=/);
+      const setCookieHeaders = result.headers.getSetCookie();
+      assertEquals(setCookieHeaders.length, 2);
+      assertEquals(setCookieHeaders[0], "othercookie=somevalue");
+      assertMatch(setCookieHeaders[1], /^session=/);
     });
   });
 });
