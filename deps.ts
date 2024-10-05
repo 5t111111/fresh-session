@@ -1,4 +1,4 @@
-export type { FreshContext } from "../fresh/src/mod.ts";
+export type { FreshContext } from "fresh";
 
 export { type Cookie, getCookies, setCookie } from "jsr:@std/http@^1.0.7";
 
