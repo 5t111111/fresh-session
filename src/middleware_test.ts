@@ -2,7 +2,6 @@ import {
   assert,
   assertEquals,
   assertExists,
-  assertFalse,
   assertMatch,
   assertRejects,
 } from "@std/assert";
@@ -10,7 +9,7 @@ import { assertSpyCalls, spy } from "@std/testing/mock";
 import { describe, it } from "@std/testing/bdd";
 import { FakeTime } from "@std/testing/time";
 
-import { sessionMiddleware } from "./middleware.ts";
+import { session } from "./middleware.ts";
 import { decrypt, encrypt } from "./crypt.ts";
 import type { SessionObject } from "./session.ts";
 import { Session } from "./session.ts";
@@ -20,43 +19,25 @@ describe("sessionMiddleware", () => {
     const next = () => {
       return new Response();
     };
+
     // deno-lint-ignore no-explicit-any
-    const ctx = { destination: "route", state: {}, next } as any;
+    const ctx = { state: {}, next } as any;
     const encryptionKey = "x".repeat(32);
     const sessionObject: SessionObject = {
       data: { test: { value: "this_is_session_data", flash: false } },
       expire: null,
     };
 
-    it("should skip process when destination is not route", async () => {
-      const req = new Request("https://example.com", {
-        headers: new Headers(),
-      });
-
-      const result = await sessionMiddleware({ encryptionKey })(
-        req,
-        { ...ctx, destination: "static" },
-      );
-
-      assert(result instanceof Response);
-      assertFalse(result.headers.has("set-cookie"));
-    });
-
     it("should throw an error when encryption key is not long enough", async () => {
       const req = new Request("https://example.com", {
-        headers: new Headers(),
+        headers: new Headers([
+          ["cookie", `session=${await encrypt(encryptionKey, "{}")}`],
+        ]),
       });
-
-      req.headers.set(
-        "cookie",
-        `session=${await encrypt(encryptionKey, "{}")}`,
-      );
-      const resultPromise = sessionMiddleware({
-        encryptionKey: "x".repeat(31),
-      })(
+      const resultPromise = session({ encryptionKey: "x".repeat(31) })({
+        ...ctx,
         req,
-        ctx,
-      );
+      }) as Promise<Response>;
 
       await assertRejects(() => resultPromise);
     });
@@ -81,10 +62,10 @@ describe("sessionMiddleware", () => {
 
       time.tick(1000);
 
-      const result = await sessionMiddleware({
+      const result = await session({
         encryptionKey,
         expireAfterSeconds: 60,
-      })(req, ctx);
+      })({ ...ctx, req });
 
       const setCookieHeader = result.headers.get("set-cookie");
       const cookieName = setCookieHeader?.split("=")[0];
@@ -130,10 +111,10 @@ describe("sessionMiddleware", () => {
       // 70 seconds after to make it expired
       time.tick(70000);
 
-      const result = await sessionMiddleware({
+      const result = await session({
         encryptionKey,
         expireAfterSeconds: 60,
-      })(req, ctx);
+      })({ ...ctx, req });
 
       const setCookieHeader = result.headers.get("set-cookie");
       const cookieName = setCookieHeader?.split("=")[0];
@@ -166,10 +147,10 @@ describe("sessionMiddleware", () => {
         headers: new Headers(),
       });
 
-      const result = await sessionMiddleware({
+      const result = await session({
         encryptionKey,
         expireAfterSeconds: 60,
-      })(req, ctx);
+      })({ ...ctx, req });
 
       const setCookieHeader = result.headers.get("set-cookie");
       const cookieName = setCookieHeader?.split("=")[0];
@@ -197,9 +178,9 @@ describe("sessionMiddleware", () => {
         headers: new Headers(),
       });
 
-      const result = await sessionMiddleware({
+      const result = await session({
         encryptionKey,
-      })(req, ctx);
+      })({ ...ctx, req });
 
       const setCookieHeader = result.headers.get("set-cookie");
       const cookieName = setCookieHeader?.split("=")[0];
@@ -224,9 +205,9 @@ describe("sessionMiddleware", () => {
         headers: new Headers(),
       });
 
-      await sessionMiddleware({
+      await session({
         encryptionKey,
-      })(req, ctx);
+      })({ ...ctx, req });
 
       assertExists(ctx.state.session);
       assertEquals(ctx.state.session instanceof Session, true);
@@ -246,10 +227,11 @@ describe("sessionMiddleware", () => {
         ]),
       });
 
-      const result = await sessionMiddleware({
+      const result = await session({
         encryptionKey,
-      })(req, {
+      })({
         ...ctx,
+        req,
         next: () =>
           new Response(null, {
             headers: new Headers([

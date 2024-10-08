@@ -1,5 +1,4 @@
-import type { MiddlewareFn } from "../../fresh/src/mod.ts";
-import type { Cookie } from "../deps.ts";
+import type { Cookie, MiddlewareFn } from "../deps.ts";
 import { Session } from "./session.ts";
 import { CookieStore } from "./cookie_store.ts";
 
