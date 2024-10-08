@@ -48,7 +48,7 @@ export interface SessionMiddlewareState {
 /**
  * Middleware for session management.
  *
- * @param options Options to configure the session middleware handler.
+ * @param options - Options to configure the session middleware handler.
  * @returns Middleware handler.
  */
 export function session<State extends SessionMiddlewareState>(
@@ -57,8 +57,8 @@ export function session<State extends SessionMiddlewareState>(
   /**
    * Middleware handler.
    *
-   * @param req The incoming request object.
-   * @param ctx The context object containing state and other information.
+   * @param req - The incoming request object.
+   * @param ctx - The context object containing state and other information.
    * @returns The response object.
    */
   return async function handler(

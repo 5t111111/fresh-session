@@ -98,7 +98,7 @@ export class CookieStore {
   /**
    * Get session data from cookies in the request.
    *
-   * @param  req The request object to get cookies from.
+   * @param  req - The request object to get cookies from.
    * @returns The session object or null if something goes wrong.
    */
   async createSetCookieHeader(

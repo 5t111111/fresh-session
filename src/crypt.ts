@@ -3,8 +3,8 @@ import { defaults, seal, unseal } from "../deps.ts";
 /**
  * Encrypt a string or object.
  *
- * @param password Password string at least 32 characters long.
- * @param payload String or object to encrypt.
+ * @param password - Password string at least 32 characters long.
+ * @param payload - String or object to encrypt.
  * @returns The encrypted string.
  */
 export async function encrypt(
@@ -17,8 +17,8 @@ export async function encrypt(
 /**
  * Decrypt an encrypted string.
  *
- * @param password Password string at least 32 characters long.
- * @param encrypted Encrypted string.
+ * @param password - Password string at least 32 characters long.
+ * @param encrypted - Encrypted string.
  * @returns The unencrypted value.
  */
 export async function decrypt(

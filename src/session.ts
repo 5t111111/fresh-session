@@ -29,7 +29,7 @@ export class Session {
   /**
    * Constructor
    *
-   * @param sessionObject Session object to be used as in-memory cache and stored in a storage. If not provided, an empty session object is initialized.
+   * @param sessionObject - Session object to be used as in-memory cache and stored in a storage. If not provided, an empty session object is initialized.
    */
   constructor(sessionObject?: SessionObject) {
     if (sessionObject) {
@@ -45,7 +45,7 @@ export class Session {
   /**
    * Set session object in the session instance as in-memory cache.
    *
-   * @param sessionObject Session object to be used as in-memory cache and stored in a storage.
+   * @param sessionObject - Session object to be used as in-memory cache and stored in a storage.
    */
   setSessionObject(sessionObject: SessionObject) {
     this.sessionObject = sessionObject;
@@ -63,7 +63,7 @@ export class Session {
   /**
    * Reset session object in the session instance by resetting data and expiration time.
 
-   * @param expirationAfterSeconds Reset expiration time after seconds.
+   * @param expirationAfterSeconds - Reset expiration time after seconds.
    */
   reset(expirationAfterSeconds?: number) {
     this.sessionObject = {
@@ -75,7 +75,7 @@ export class Session {
   /**
    * Refresh session expiration time.
    *
-   * @param expirationAfterSeconds Reset expiration time after seconds.
+   * @param expirationAfterSeconds - Reset expiration time after seconds.
    */
   refresh(expirationAfterSeconds: number) {
     this.sessionObject.expire = this.calculateExpireDate(
@@ -96,8 +96,8 @@ export class Session {
   /**
    * Get session data by key.
    *
-   * @param key Session data key.
-   * @returns data for the key.
+   * @param key - Session data key.
+   * @returns Data for the key.
    */
   get(key: string): unknown {
     const entry = this.sessionObject.data[key];
@@ -117,8 +117,8 @@ export class Session {
   /**
    * Set session data by key.
    *
-   * @param key Session data key.
-   * @param value Session data value.
+   * @param key - Session data key.
+   * @param value - Session data value.
    */
   set(key: string, value: unknown) {
     this.sessionObject.data[key] = {
@@ -130,8 +130,8 @@ export class Session {
   /**
    * Set session data and mark it as flash data to be removed after the next request.
    *
-   * @param key Session data key.
-   * @param value Session data value.
+   * @param key - Session data key.
+   * @param value - Session data value.
    */
   flash(key: string, value: unknown) {
     this.sessionObject.data[key] = {
@@ -143,7 +143,7 @@ export class Session {
   /**
    * Calculate the expiration date based on the given number of seconds.
    *
-   * @param expirationAfterSeconds The number of seconds after which the session should expire. If undefined, it returns null.
+   * @param expirationAfterSeconds - The number of seconds after which the session should expire. If undefined, it returns null.
    * @returns The calculated expiration date in ISO 8601 format, or null if no expiration is set.
    */
   private calculateExpireDate(
