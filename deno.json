@@ -7,7 +7,10 @@
   },
   "license": "MIT",
   "imports": {
+    "@brc-dd/iron": "jsr:@brc-dd/iron@^1.2.1",
+    "@fresh/core": "jsr:@fresh/core@^2.0.0-alpha.22",
     "@std/assert": "jsr:@std/assert@1",
+    "@std/http": "jsr:@std/http@^1.0.8",
     "@std/testing": "jsr:@std/testing@1"
   },
   "publish": {
@@ -17,7 +20,6 @@
       "deno.jsonc",
       "deno.lock",
       "mod.ts",
-      "deps.ts",
       "src/**/*.ts"
     ],
     "exclude": [

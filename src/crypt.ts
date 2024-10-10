@@ -1,4 +1,4 @@
-import { defaults, seal, unseal } from "../deps.ts";
+import { defaults, seal, unseal } from "@brc-dd/iron";
 
 /**
  * Encrypt a string or object.

@@ -1,6 +1,7 @@
-import type { Cookie, MiddlewareFn } from "../deps.ts";
 import { Session } from "./session.ts";
 import { CookieStore } from "./cookie_store.ts";
+import type { MiddlewareFn } from "@fresh/core";
+import type { Cookie } from "@std/http";
 
 /**
  * Options for configuring cookies used in session management.

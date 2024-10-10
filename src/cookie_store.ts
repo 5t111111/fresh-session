@@ -1,7 +1,7 @@
 import { decrypt, encrypt } from "./crypt.ts";
-import { type Cookie, getCookies, setCookie } from "../deps.ts";
 import type { CookieOptions } from "./middleware.ts";
 import type { SessionObject } from "./session.ts";
+import { type Cookie, getCookies, setCookie } from "@std/http";
 
 /**
  * Options for configuring the CookieStore.
