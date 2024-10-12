@@ -24,5 +24,4 @@
  * ```
  */
 
-export { session } from "./src/middleware.ts";
-export { Session } from "./src/session.ts";
+export { Session, session } from "./src/mod.ts";
