@@ -2,7 +2,7 @@ import { assert, assertEquals, assertFalse } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
 import { FakeTime } from "@std/testing/time";
 
-import type { SessionObject } from "./session.ts";
+import type { SessionState } from "./session.ts";
 import { Session } from "./session.ts";
 
 describe("Session", () => {
@@ -15,43 +15,43 @@ describe("Session", () => {
         expire: new Date().toISOString(),
       });
 
-      const sessionObject = session.getSessionObject();
+      const state = session.getState();
 
-      assertEquals(sessionObject.data.test.value, "this_is_session_data");
-      assertEquals(sessionObject.data.test.flash, true);
-      assertEquals(sessionObject.expire, new Date().toISOString());
+      assertEquals(state.data.test.value, "this_is_session_data");
+      assertEquals(state.data.test.flash, true);
+      assertEquals(state.expire, new Date().toISOString());
     });
 
     it("should set the default values to property", () => {
       const session = new Session();
 
-      const sessionObject = session.getSessionObject();
+      const state = session.getState();
 
-      assertEquals(sessionObject.data, {});
-      assertEquals(sessionObject.expire, null);
+      assertEquals(state.data, {});
+      assertEquals(state.expire, null);
     });
   });
 
-  describe("setSessionObject", () => {
+  describe("setState", () => {
     it("should set the session object correctly", () => {
       using _time = new FakeTime("2222-02-02T00:00:00.000Z");
 
-      const sessionObject: SessionObject = {
+      const state: SessionState = {
         data: { test: { value: "this_is_session_data", flash: false } },
         expire: new Date().toISOString(),
       };
 
       const session = new Session();
-      session.setSessionObject(sessionObject);
+      session.setState(state);
 
-      const result = session.getSessionObject();
+      const result = session.getState();
 
-      assertEquals(sessionObject.data.test.value, "this_is_session_data");
+      assertEquals(state.data.test.value, "this_is_session_data");
       assertEquals(result.expire, new Date().toISOString());
     });
   });
 
-  describe("getSessionObject", () => {
+  describe("getState", () => {
     it("should get the session object correctly", () => {
       using _time = new FakeTime("2222-02-02T00:00:00.000Z");
 
@@ -60,11 +60,11 @@ describe("Session", () => {
         expire: new Date().toISOString(),
       });
 
-      const sessionObject = session.getSessionObject();
+      const state = session.getState();
 
-      assertEquals(sessionObject.data.test.value, "this_is_session_data");
-      assertEquals(sessionObject.data.test.flash, true);
-      assertEquals(sessionObject.expire, new Date().toISOString());
+      assertEquals(state.data.test.value, "this_is_session_data");
+      assertEquals(state.data.test.flash, true);
+      assertEquals(state.expire, new Date().toISOString());
     });
   });
 
@@ -79,10 +79,10 @@ describe("Session", () => {
 
       session.reset(60);
 
-      const sessionObject = session.getSessionObject();
+      const state = session.getState();
 
-      assertEquals(sessionObject.data, {});
-      assertEquals(sessionObject.expire, "2222-02-02T00:01:00.000Z");
+      assertEquals(state.data, {});
+      assertEquals(state.expire, "2222-02-02T00:01:00.000Z");
     });
 
     it("should reset the session object correctly without expiration time", () => {
@@ -95,10 +95,10 @@ describe("Session", () => {
 
       session.reset();
 
-      const sessionObject = session.getSessionObject();
+      const state = session.getState();
 
-      assertEquals(sessionObject.data, {});
-      assertEquals(sessionObject.expire, null);
+      assertEquals(state.data, {});
+      assertEquals(state.expire, null);
     });
   });
 
@@ -113,9 +113,9 @@ describe("Session", () => {
 
       session.refresh(60);
 
-      const sessionObject = session.getSessionObject();
+      const state = session.getState();
 
-      assertEquals(sessionObject.expire, "2222-02-02T00:01:00.000Z");
+      assertEquals(state.expire, "2222-02-02T00:01:00.000Z");
     });
   });
 

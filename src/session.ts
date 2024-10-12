@@ -1,7 +1,7 @@
 /**
- * Session object to be stored in a storage and used as in-memory cache
+ * Session state to be stored in a storage and used as in-memory cache
  */
-export interface SessionObject {
+export interface SessionState {
   /**
    * Data type representing a record of session data.
    * Each key is a string and the value is an object containing:
@@ -18,24 +18,24 @@ export interface SessionObject {
 }
 
 /**
- * A class to manage session data.
+ * A class to manage session state.
  */
 export class Session {
   /**
-   * Session object to be used as in-memory cache and stored in a storage.
+   * Session state to be used as in-memory cache and stored in a storage.
    */
-  private sessionObject: SessionObject;
+  private state: SessionState;
 
   /**
    * Constructor
    *
-   * @param sessionObject - Session object to be used as in-memory cache and stored in a storage. If not provided, an empty session object is initialized.
+   * @param initialState - Session state to be used as in-memory cache and stored in a storage. If not provided, an empty session state is initialized.
    */
-  constructor(sessionObject?: SessionObject) {
-    if (sessionObject) {
-      this.sessionObject = sessionObject;
+  constructor(initialState?: SessionState) {
+    if (initialState) {
+      this.state = initialState;
     } else {
-      this.sessionObject = {
+      this.state = {
         data: {},
         expire: null,
       };
@@ -43,30 +43,30 @@ export class Session {
   }
 
   /**
-   * Set session object in the session instance as in-memory cache.
+   * Set session state in the session instance as in-memory cache.
    *
-   * @param sessionObject - Session object to be used as in-memory cache and stored in a storage.
+   * @param value - Object representing the session state.
    */
-  setSessionObject(sessionObject: SessionObject) {
-    this.sessionObject = sessionObject;
+  setState(value: SessionState) {
+    this.state = value;
   }
 
   /**
-   * Get session object from the session instance.
+   * Get session state from the session instance.
    *
-   * @returns Session object cached in the session instance.
+   * @returns Session state cached in the session instance.
    */
-  getSessionObject(): SessionObject {
-    return this.sessionObject;
+  getState(): SessionState {
+    return this.state;
   }
 
   /**
-   * Reset session object in the session instance by resetting data and expiration time.
+   * Reset session state in the session instance by resetting data and expiration time.
 
    * @param expirationAfterSeconds - Reset expiration time after seconds.
    */
   reset(expirationAfterSeconds?: number) {
-    this.sessionObject = {
+    this.state = {
       data: {},
       expire: this.calculateExpireDate(expirationAfterSeconds),
     };
@@ -78,7 +78,7 @@ export class Session {
    * @param expirationAfterSeconds - Reset expiration time after seconds.
    */
   refresh(expirationAfterSeconds: number) {
-    this.sessionObject.expire = this.calculateExpireDate(
+    this.state.expire = this.calculateExpireDate(
       expirationAfterSeconds,
     );
   }
@@ -89,8 +89,8 @@ export class Session {
    * @returns true if the session is expired.
    */
   isExpired(): boolean {
-    return !!this.sessionObject.expire &&
-      Date.now() > new Date(this.sessionObject.expire).getTime();
+    return !!this.state.expire &&
+      Date.now() > new Date(this.state.expire).getTime();
   }
 
   /**
@@ -100,12 +100,12 @@ export class Session {
    * @returns Data for the key.
    */
   get(key: string): unknown {
-    const entry = this.sessionObject.data[key];
+    const entry = this.state.data[key];
 
     if (entry) {
       const value = entry.value;
       if (entry.flash) {
-        delete this.sessionObject.data[key];
+        delete this.state.data[key];
       }
 
       return value;
@@ -121,7 +121,7 @@ export class Session {
    * @param value - Session data value.
    */
   set(key: string, value: unknown) {
-    this.sessionObject.data[key] = {
+    this.state.data[key] = {
       value,
       flash: false,
     };
@@ -134,7 +134,7 @@ export class Session {
    * @param value - Session data value.
    */
   flash(key: string, value: unknown) {
-    this.sessionObject.data[key] = {
+    this.state.data[key] = {
       value,
       flash: true,
     };

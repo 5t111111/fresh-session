@@ -3,11 +3,11 @@ import { describe, it } from "@std/testing/bdd";
 
 import { CookieStore } from "./cookie_store.ts";
 import { decrypt, encrypt } from "./crypt.ts";
-import type { SessionObject } from "./session.ts";
+import type { SessionState } from "./session.ts";
 
 describe("CookieStore", () => {
   const encryptionKey = "x".repeat(32);
-  const sessionObject: SessionObject = {
+  const state: SessionState = {
     data: { test: { value: "this_is_session_data", flash: false } },
     expire: null,
   };
@@ -32,7 +32,7 @@ describe("CookieStore", () => {
 
       const encryptedData = await encrypt(
         encryptionKey,
-        JSON.stringify(sessionObject),
+        JSON.stringify(state),
       );
 
       const req = new Request("https://example.com", {
@@ -113,7 +113,7 @@ describe("CookieStore", () => {
 
       const encryptedData = await encrypt(
         encryptionKey,
-        JSON.stringify(sessionObject),
+        JSON.stringify(state),
       );
 
       const req = new Request("https://example.com", {
@@ -137,7 +137,7 @@ describe("CookieStore", () => {
       const headers = new Headers([["key1", "value1"]]);
       const result = await cookieStore.createSetCookieHeader(
         headers,
-        sessionObject,
+        state,
       );
       const setCookieHeader = result.get("set-cookie");
       const cookieName = setCookieHeader?.split("=")[0];
@@ -149,7 +149,7 @@ describe("CookieStore", () => {
       assertExists(cookieValue);
       assertEquals(
         JSON.parse((await decrypt(encryptionKey, cookieValue)) as string),
-        sessionObject,
+        state,
       );
       assertEquals(existingHeader, "value1");
     });
@@ -162,7 +162,7 @@ describe("CookieStore", () => {
 
       const result = await cookieStore.createSetCookieHeader(
         new Headers(),
-        sessionObject,
+        state,
       );
       const setCookieHeader = result.get("set-cookie");
       const cookieName = setCookieHeader?.split("=")[0];
@@ -183,7 +183,7 @@ describe("CookieStore", () => {
 
       const result = await cookieStore.createSetCookieHeader(
         new Headers(),
-        sessionObject,
+        state,
       );
       const setCookieHeader = result.get("set-cookie");
 

@@ -1,6 +1,6 @@
 import { decrypt, encrypt } from "./crypt.ts";
 import type { CookieOptions } from "./middleware.ts";
-import type { SessionObject } from "./session.ts";
+import type { SessionState } from "./session.ts";
 import { type Cookie, getCookies, setCookie } from "@std/http";
 
 /**
@@ -61,7 +61,7 @@ export class CookieStore {
    * @param req Request object to get cookies from
    * @returns Session object or null when something goes wrong
    */
-  async getSession(req: Request): Promise<SessionObject | null> {
+  async getSession(req: Request): Promise<SessionState | null> {
     // Get cookies from request headers.
     const cookies = getCookies(req.headers);
 
@@ -83,16 +83,16 @@ export class CookieStore {
       return null;
     }
 
-    let sessionObject: SessionObject;
+    let state: SessionState;
 
     try {
-      sessionObject = JSON.parse(sessionDataRaw) as SessionObject;
+      state = JSON.parse(sessionDataRaw) as SessionState;
     } catch {
       // Return null when JSON parse fails.
       return null;
     }
 
-    return sessionObject;
+    return state;
   }
 
   /**
@@ -103,10 +103,10 @@ export class CookieStore {
    */
   async createSetCookieHeader(
     headers: Headers,
-    sessionObject: SessionObject,
+    state: SessionState,
   ): Promise<Headers> {
     // Serialize session object into a string.
-    const serialized = JSON.stringify(sessionObject);
+    const serialized = JSON.stringify(state);
 
     const cookie: Cookie = {
       name: this.sessionCookieName,

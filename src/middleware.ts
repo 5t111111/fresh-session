@@ -90,10 +90,10 @@ export function session<State extends SessionMiddlewareState>(
     const session = new Session();
 
     // Get session object from the request.
-    const sessionObject = await store.getSession(req);
+    const sessionState = await store.getSession(req);
 
-    if (sessionObject) {
-      session.setSessionObject(sessionObject);
+    if (sessionState) {
+      session.setState(sessionState);
 
       if (!session.isExpired() && expireAfterSeconds) {
         session.refresh(expireAfterSeconds);
@@ -113,7 +113,7 @@ export function session<State extends SessionMiddlewareState>(
     // Create set-cookie header.
     const headers = await store.createSetCookieHeader(
       new Headers(),
-      session.getSessionObject(),
+      session.getState(),
     );
 
     // Append constructed set-cookie headers to the response headers.

@@ -11,7 +11,7 @@ import { FakeTime } from "@std/testing/time";
 
 import { session } from "./middleware.ts";
 import { decrypt, encrypt } from "./crypt.ts";
-import type { SessionObject } from "./session.ts";
+import type { SessionState } from "./session.ts";
 import { Session } from "./session.ts";
 
 describe("sessionMiddleware", () => {
@@ -23,7 +23,7 @@ describe("sessionMiddleware", () => {
     // deno-lint-ignore no-explicit-any
     const ctx = { state: {}, next } as any;
     const encryptionKey = "x".repeat(32);
-    const sessionObject: SessionObject = {
+    const state: SessionState = {
       data: { test: { value: "this_is_session_data", flash: false } },
       expire: null,
     };
@@ -45,13 +45,13 @@ describe("sessionMiddleware", () => {
     it("should not create a new session, just refresh it when session exists and not expired", async () => {
       using time = new FakeTime("2222-02-02T00:00:00.000Z");
 
-      using getSessionObjectSpy = spy(Session.prototype, "getSessionObject");
-      using setSessionObjectSpy = spy(Session.prototype, "setSessionObject");
+      using getStateSpy = spy(Session.prototype, "getState");
+      using setStateSpy = spy(Session.prototype, "setState");
       using refreshSpy = spy(Session.prototype, "refresh");
 
       const encryptedData = await encrypt(
         encryptionKey,
-        JSON.stringify(sessionObject),
+        JSON.stringify(state),
       );
 
       const req = new Request("https://example.com", {
@@ -76,8 +76,8 @@ describe("sessionMiddleware", () => {
         ) as string,
       );
 
-      assertSpyCalls(getSessionObjectSpy, 1);
-      assertSpyCalls(setSessionObjectSpy, 1);
+      assertSpyCalls(getStateSpy, 1);
+      assertSpyCalls(setStateSpy, 1);
       assertSpyCalls(refreshSpy, 1);
       assertEquals(refreshSpy.calls[0].args[0], 60);
       assertEquals(result.headers.has("set-cookie"), true);
@@ -90,14 +90,14 @@ describe("sessionMiddleware", () => {
     it("should reset session when session exists but expired", async () => {
       using time = new FakeTime("2222-02-02T00:00:00.000Z");
 
-      using getSessionObjectSpy = spy(Session.prototype, "getSessionObject");
+      using getStateSpy = spy(Session.prototype, "getState");
       using refreshSpy = spy(Session.prototype, "refresh");
       using resetSpy = spy(Session.prototype, "reset");
 
       const encryptedData = await encrypt(
         encryptionKey,
         JSON.stringify({
-          ...sessionObject,
+          ...state,
           expire: "2222-02-02T00:01:00.000Z",
         }),
       );
@@ -125,7 +125,7 @@ describe("sessionMiddleware", () => {
         ) as string,
       );
 
-      assertSpyCalls(getSessionObjectSpy, 1);
+      assertSpyCalls(getStateSpy, 1);
       assertSpyCalls(refreshSpy, 0);
       assertEquals(result.headers.has("set-cookie"), true);
       assertSpyCalls(resetSpy, 1);
@@ -211,14 +211,14 @@ describe("sessionMiddleware", () => {
 
       assertExists(ctx.state.session);
       assertEquals(ctx.state.session instanceof Session, true);
-      assertEquals(ctx.state.session.getSessionObject().data, {});
-      assertEquals(ctx.state.session.getSessionObject().expire, null);
+      assertEquals(ctx.state.session.getState().data, {});
+      assertEquals(ctx.state.session.getState().expire, null);
     });
 
     it("should merge set-cookie header with headers from next handler", async () => {
       const encryptedData = await encrypt(
         encryptionKey,
-        JSON.stringify(sessionObject),
+        JSON.stringify(state),
       );
 
       const req = new Request("https://example.com", {
