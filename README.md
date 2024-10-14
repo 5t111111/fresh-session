@@ -46,41 +46,80 @@ export default defineConfig({
 The session data is stored as the state of the context. Therefore, within your
 routes, you can access it using ctx.state.session.
 
-A typical way to get a session is as follows:
+A typical way to set data in a session is as follows:
+
+**`./routes/sign_in.tsx`**
 
 ```tsx
-// routes/profile.tsx
-
-import { Handlers, PageProps } from "$fresh/server.ts";
-import { type JsonCompatible, Session } from "@5t111111/fresh-session";
+import { Handlers } from "$fresh/server.ts";
+import { Session } from "@5t111111/fresh-session";
 
 interface State {
   session: Session;
 }
 
-interface User {
-  id: number;
-  name: string;
-}
-
-interface Props {
-  user: User;
-}
-
-// deno-lint-ignore no-explicit-any
 export const handler: Handlers<any, State> = {
-  GET(_req, ctx) {
-    const session = ctx.state.session;
-    const user = session.get<JsonCompatible<User>>("user");
+  async POST(req, ctx) {
+    const form = await req.formData();
+    const email = form.get("email")?.toString();
+    const password = form.get("password")?.toString();
 
-    if (!user) {
+    // Check if the user exists in the database and the password is correct...
+    // Let's assume that the type of the user data is { id: number; name: string; }.
+    const user = await authenticate(email, password);
+
+    // Set the user ID in the session.
+    const session = ctx.state.session;
+    session.set("isAuthenticated", true);
+    session.set("userId", user.id);
+
+    // Redirect users to profile page.
+    return new Response(null, {
+      status: 302,
+      headers: { Location: "/profile" },
+    });
+  },
+};
+
+export default function SignInPage() {
+  return (
+    <main>
+      <form method="post">
+        <input type="email" name="email" value="" />
+        <input type="password" name="password" value="" />
+        <button type="submit">Sign in</button>
+      </form>
+    </main>
+  );
+}
+```
+
+You can get data from a session in a similar way:
+
+**`./routes/profile.tsx`**
+
+```tsx
+import { page, PageProps } from "fresh";
+import { define } from "../utils.ts";
+
+export const handler: Handlers<any, State> = {
+  async GET(_req, ctx) {
+    const session = ctx.state.session;
+    const isAuthenticated = session.get<boolean>("isAuthenticated");
+    const userId = session.get<number>("userId");
+
+    if (!isAuthenticated) {
       return new Response(null, {
         status: 307,
         headers: { Location: "/sign_in" },
       });
     }
 
-    return ctx.render({
+    // For example, user information is retrieved from the database based on
+    // the user ID stored in the session.
+    const user = await findUserById(userId);
+
+    return page({
       user,
     });
   },
@@ -100,66 +139,47 @@ export default function ProfilePage({ data }: PageProps<Props>) {
 }
 ```
 
-Please note that when retrieving values from the session, we are using the
-utility type `JsonCompatible` with type parameters. The session can only store
-serializable values, which is equivalent to values that can be serialized to
-JSON. Therefore, if the value stored in the session is a primitive like a
-string, it can be retrieved as is. However, if the value is an object or
-something similar, it is necessary to apply the `JsonCompatible` type to the
-type parameter. This ensures type-safe retrieval of values from the session.
+Note that type parameters are used when retrieving data from the session. This
+is necessary to handle the session data as type-safely as possible. However,
+this is primarily for making the retrieved data easier to handle at the type
+level, so to ensure runtime safety, it is recommended to implement validation
+for the retrieved data (for example, parsing the data using Zod or Valibot).
 
-You can also set data to the session in a similar way:
+### JsonCompatible utility type
 
-```tsx
-// routes/sign_in.tsx
+In most cases, storing and retrieving data from the session can be done using
+the methods described above. In other words:
 
-import { Handlers } from "$fresh/server.ts";
-import { type JsonCompatible, Session } from "@5t111111/fresh-session";
+- When using `set`, type parameters are not necessary
+- When using get, provide parameters that match the type of data being retrieved
 
-interface State {
-  session: Session;
-}
+However, this alone may not allow TypeScript to infer types as expected. For
+example, this could happen when the type being saved or retrieved is constrained
+as an interface type.
 
+Example:
+
+```typescript
 interface User {
   id: number;
   name: string;
 }
-
-// deno-lint-ignore no-explicit-any
-export const handler: Handlers<any, State> = {
-  async POST(req, ctx) {
-    const form = await req.formData();
-    const email = form.get("email")?.toString();
-    const password = form.get("password")?.toString();
-
-    // Check if the user exists in the database and the password is correct...
-
-    // Set the user in the session.
-    const user: User = { id: 1, name: "Alice" };
-    const session = ctx.state.session;
-    session.set<JsonCompatible<User>>("user", user);
-
-    // Redirect user to profile page.
-    return new Response(null, {
-      status: 302,
-      headers: { Location: "/profile" },
-    });
-  },
-};
-
-export default function SignInPage() {
-  return (
-    <form method="post">
-      <input type="email" name="email" value="" />
-      <input type="password" name="password" value="" />
-      <button type="submit">Sign in</button>
-    </form>
-  );
-}
 ```
 
-The `JsonCompatible` type parameter is needed here too if you would like to
-store complex types like objects.
+When handling such types of data in a session, due to type mismatches, you may
+not be able to directly use them with set or get. In such cases, a useful
+utility type `JsonCompatible` has been provided. You can use it as follows:
+
+```typescript
+import { type JsonCompatible } from "@5t111111/fresh-session";
+
+session.set<JsonCompatible<User>>("user", user);
+const user = session.get<JsonCompatible<User>>("user");
+```
+
+This will resolve type errors. However, it is strongly recommended that you save
+values in the session as simple data types, such as primitives. For example, as
+in the previous example, it is better to save only the user ID.
 
 ## Contributing
 
