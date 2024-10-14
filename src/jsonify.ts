@@ -10,6 +10,7 @@
 // so that we can infer the shape of the data sent over the network.
 export type Jsonify<T> =
   // any
+  // deno-lint-ignore no-explicit-any
   IsAny<T> extends true ? any
     // toJSON
     : T extends { toJSON(): infer U } ? (U extends JsonValue ? U : unknown)
@@ -43,7 +44,7 @@ export type Jsonify<T> =
 
 // value is always not JSON => true
 // value is always JSON => false
-// value is somtimes JSON, sometimes not JSON => boolean
+// value is sometimes JSON, sometimes not JSON => boolean
 // note: cannot be inlined as logic requires union distribution
 type ValueIsNotJson<T> = T extends NotJson ? true : false;
 
