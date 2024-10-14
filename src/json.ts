@@ -12,13 +12,13 @@ export type JsonValue =
 /**
  * Interface for objects that may be serialized to JSON
  */
-interface JsonObject extends Record<string, JsonValue> {}
+export interface JsonObject extends Record<string, JsonValue> {}
 
 /**
  * Type for representing any function
  */
 // deno-lint-ignore no-explicit-any
-type AnyFunction = (...args: any[]) => unknown;
+export type AnyFunction = (...args: any[]) => unknown;
 
 /**
  * Types that are not assignable to JSON

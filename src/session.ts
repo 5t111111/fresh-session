@@ -99,6 +99,7 @@ export class Session {
    * Get session data by key.
    *
    * @param key - Session data key.
+   * @template T - Type of the value to be retrieved.
    * @returns Data for the key.
    */
   get<T extends JsonValue>(key: string): T | null {
@@ -121,6 +122,7 @@ export class Session {
    *
    * @param key - Session data key.
    * @param value - Session data value.
+   * @template T - Type of the value to be stored.
    */
   set<T extends JsonValue>(key: string, value: T) {
     this.state.data[key] = {
@@ -134,8 +136,9 @@ export class Session {
    *
    * @param key - Session data key.
    * @param value - Session data value.
+   * @template T - Type of the value to be stored.
    */
-  flash(key: string, value: JsonValue) {
+  flash<T extends JsonValue>(key: string, value: T) {
     this.state.data[key] = {
       value,
       flash: true,
