@@ -1,4 +1,14 @@
 /**
+ * Type for all values that may be serialized to JSON
+ */
+type JsonValue = string | number | boolean | null | JsonObject | JsonValue[];
+
+/**
+ * Interface for objects that may be serialized to JSON
+ */
+interface JsonObject extends Record<string, JsonValue> {}
+
+/**
  * Session state to be stored in a storage and used as in-memory cache
  */
 export interface SessionState {
@@ -8,7 +18,7 @@ export interface SessionState {
    * - value: The actual data to be stored.
    * - flash: A boolean indicating if the data should be removed after being read once.
    */
-  data: Record<string, { value: unknown; flash: boolean }>;
+  data: Record<string, { value: JsonValue; flash: boolean }>;
 
   /**
    * Expire type representing the expiration time of a session.
@@ -99,11 +109,11 @@ export class Session {
    * @param key - Session data key.
    * @returns Data for the key.
    */
-  get(key: string): unknown {
+  get<T extends JsonValue = JsonValue>(key: string): T | null {
     const entry = this.state.data[key];
 
     if (entry) {
-      const value = entry.value;
+      const value = entry.value as T;
       if (entry.flash) {
         delete this.state.data[key];
       }
@@ -120,7 +130,7 @@ export class Session {
    * @param key - Session data key.
    * @param value - Session data value.
    */
-  set(key: string, value: unknown) {
+  set(key: string, value: JsonValue) {
     this.state.data[key] = {
       value,
       flash: false,
@@ -133,7 +143,7 @@ export class Session {
    * @param key - Session data key.
    * @param value - Session data value.
    */
-  flash(key: string, value: unknown) {
+  flash(key: string, value: JsonValue) {
     this.state.data[key] = {
       value,
       flash: true,
