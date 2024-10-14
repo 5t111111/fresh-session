@@ -24,4 +24,4 @@
  * ```
  */
 
-export { type Jsonify, Session, session } from "./src/mod.ts";
+export { type JsonCompatible, Session, session } from "./src/mod.ts";

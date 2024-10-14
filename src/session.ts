@@ -1,4 +1,4 @@
-import type { JsonValue } from "./jsonify.ts";
+import type { JsonValue } from "./json.ts";
 
 /**
  * Session state to be stored in a storage and used as in-memory cache
@@ -101,7 +101,7 @@ export class Session {
    * @param key - Session data key.
    * @returns Data for the key.
    */
-  get<T extends JsonValue = JsonValue>(key: string): T | null {
+  get<T extends JsonValue>(key: string): T | null {
     const entry = this.state.data[key];
 
     if (entry) {
@@ -122,7 +122,7 @@ export class Session {
    * @param key - Session data key.
    * @param value - Session data value.
    */
-  set(key: string, value: JsonValue) {
+  set<T extends JsonValue>(key: string, value: T) {
     this.state.data[key] = {
       value,
       flash: false,

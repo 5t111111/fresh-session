@@ -58,7 +58,7 @@ export const define = createDefine<State>();
 
 ```tsx
 import { page, PageProps } from "fresh";
-import { Jsonify } from "fresh-session";
+import { type JsonCompatible } from "@5t111111/fresh-session";
 import { define } from "../utils.ts";
 
 interface User {
@@ -73,8 +73,7 @@ interface Props {
 export const handler = define.handlers({
   GET: (ctx) => {
     const session = ctx.state.session;
-
-    const user = session.get<Jsonify<User>>("user");
+    const user = session.get<JsonCompatible<User>>("user");
 
     if (!user) {
       return new Response(null, {
@@ -105,19 +104,19 @@ export default function ProfilePage({ data }: PageProps<Props>) {
 ```
 
 Please note that when retrieving values from the session, we are using the
-utility type `Jsonify` with type parameters. The session can only store
+utility type `JsonCompatible` with type parameters. The session can only store
 serializable values, which is equivalent to values that can be serialized to
 JSON. Therefore, if the value stored in the session is a primitive like a
 string, it can be retrieved as is. However, if the value is an object or
-something similar, it is necessary to apply the `Jsonify` type to the type
-parameter. This ensures type-safe retrieval of values from the session.
+something similar, it is necessary to apply the `JsonCompatible` type to the
+type parameter. This ensures type-safe retrieval of values from the session.
 
 You can also set data to the session in a similar way:
 
 **`./routes/sign_in.tsx`**
 
 ```tsx
-import { Session } from "@5t111111/fresh-session";
+import { type JsonCompatible, Session } from "@5t111111/fresh-session";
 import { define } from "../utils.ts";
 
 interface User {
@@ -136,7 +135,7 @@ export const handler = define.handlers({
     // Set the user in the session.
     const user: User = { id: 1993, name: "Deno" };
     const session = ctx.state.session;
-    session.set("user", user);
+    session.set<JsonCompatible<User>>("user", user);
 
     // Redirect user to profile page.
     return new Response(null, {
@@ -158,6 +157,9 @@ export default function SignInPage() {
   );
 }
 ```
+
+The `JsonCompatible` type parameter is needed here too if you would like to
+store complex types like objects.
 
 ## Contributing
 
