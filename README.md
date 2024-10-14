@@ -52,7 +52,7 @@ A typical way to get a session is as follows:
 // routes/profile.tsx
 
 import { Handlers, PageProps } from "$fresh/server.ts";
-import { Session } from "@5t111111/fresh-session";
+import { Jsonify, Session } from "@5t111111/fresh-session";
 
 interface State {
   session: Session;
@@ -71,7 +71,8 @@ interface Props {
 export const handler: Handlers<any, State> = {
   GET(_req, ctx) {
     const session = ctx.state.session;
-    const user = session.get("user") as User;
+
+    const user = session.get<Jsonify<User>>("user");
 
     if (!user) {
       return new Response(null, {
@@ -99,6 +100,14 @@ export default function ProfilePage({ data }: PageProps<Props>) {
   );
 }
 ```
+
+Please note that when retrieving values from the session, we are using the
+utility type `Jsonify` with type parameters. The session can only store
+serializable values, which is equivalent to values that can be serialized to
+JSON. Therefore, if the value stored in the session is a primitive like a
+string, it can be retrieved as is. However, if the value is an object or
+something similar, it is necessary to apply the `Jsonify` type to the type
+parameter. This ensures type-safe retrieval of values from the session.
 
 You can also set data to the session in a similar way:
 

@@ -162,7 +162,7 @@ describe("Session", () => {
       });
 
       const result = session.get("test");
-      const result2 = session.get("test");
+      const result2 = session.get<string>("test"); // Also test if it accepts type parameter.
 
       assertEquals(result, "this_is_session_data");
       assertEquals(result2, "this_is_session_data");
@@ -175,7 +175,7 @@ describe("Session", () => {
       });
 
       const result = session.get("test");
-      const result2 = session.get("test");
+      const result2 = session.get<string>("test"); // Also test if it accepts type parameter.
 
       assertEquals(result, "this_is_session_data");
       assertEquals(result2, null);
