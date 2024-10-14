@@ -25,6 +25,5 @@
  * ```
  */
 export { sessionPlugin } from "./src/plugin.ts";
-
 export { Session } from "./src/session.ts";
-export type { Jsonify } from "./src/jsonify.ts";
+export type { JsonCompatible } from "./src/json.ts";
