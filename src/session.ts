@@ -1,12 +1,4 @@
-/**
- * Type for all values that may be serialized to JSON
- */
-type JsonValue = string | number | boolean | null | JsonObject | JsonValue[];
-
-/**
- * Interface for objects that may be serialized to JSON
- */
-interface JsonObject extends Record<string, JsonValue> {}
+import type { JsonValue } from "./jsonify.ts";
 
 /**
  * Session state to be stored in a storage and used as in-memory cache

@@ -24,4 +24,4 @@
  * ```
  */
 
-export { Session, session } from "./src/mod.ts";
+export { type Jsonify, Session, session } from "./src/mod.ts";
