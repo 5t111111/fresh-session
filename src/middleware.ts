@@ -58,7 +58,6 @@ export function session<State extends SessionMiddlewareState>(
   /**
    * Middleware handler.
    *
-   * @param req - The incoming request object.
    * @param ctx - The context object containing state and other information.
    * @returns The response object.
    */
