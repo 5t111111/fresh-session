@@ -151,7 +151,8 @@ In most cases, storing and retrieving data from the session can be done using
 the methods described above. In other words:
 
 - When using `set`, type parameters are not necessary
-- When using get, provide parameters that match the type of data being retrieved
+- When using `get`, provide parameters that match the type of data being
+  retrieved
 
 However, this alone may not allow TypeScript to infer types as expected. For
 example, this could happen when the type being saved or retrieved is constrained
