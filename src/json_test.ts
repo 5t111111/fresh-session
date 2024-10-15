@@ -1,6 +1,12 @@
 import { describe, it } from "@std/testing/bdd";
 import { assertType, type Has, type IsExact } from "@std/testing/types";
-import type { JsonCompatible, JsonObject, JsonValue } from "./json.ts";
+
+import type {
+  AnyFunction,
+  JsonCompatible,
+  JsonObject,
+  JsonValue,
+} from "./json.ts";
 
 describe("JsonValue", () => {
   it("should be a string", () => {
@@ -150,6 +156,28 @@ describe("JsonCompatible", () => {
     assertType<IsExact<JsonCompatibleType1, never>>(true);
     assertType<IsExact<JsonCompatibleType2, never>>(true);
     assertType<IsExact<JsonCompatibleType3, never>>(true);
+  });
+});
+
+describe("AnyFunction", () => {
+  it("should be a function with no arg and no return value", () => {
+    const _: AnyFunction = () => {};
+  });
+
+  it("should be a function with some args", () => {
+    const _: AnyFunction = (_a: string, _b: number) => {};
+  });
+
+  it("should be a function with a return value", () => {
+    const _: AnyFunction = (): string => "test";
+  });
+
+  it("should be a function with function arg", () => {
+    const _: AnyFunction = (_a: () => void) => {};
+  });
+
+  it("should be a function which returns a function", () => {
+    const _: AnyFunction = (): () => void => () => {};
   });
 });
 

@@ -5,8 +5,7 @@ import { assertType, type IsExact } from "@std/testing/types";
 
 import type { SessionObject } from "./session.ts";
 import { Session } from "./session.ts";
-import type { JsonValue } from "./json.ts";
-import type { JsonCompatible } from "./mod.ts";
+import type { JsonCompatible, JsonValue } from "./json.ts";
 
 describe("Session", () => {
   describe("constructor", () => {
