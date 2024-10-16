@@ -85,7 +85,15 @@ export interface FreshConfig {
   plugins?: Plugin[];
   staticDir?: string;
   router?: RouterOptions;
-  server?: Partial<Deno.ServeTlsOptions>;
+  // =============================================================================
+  // MODIFICATIONS START
+  // =============================================================================
+  // server: Partial<Deno.ServeTlsOptions>;
+  // deno-lint-ignore no-explicit-any
+  server: any;
+  // =============================================================================
+  // MODIFICATIONS END
+  // =============================================================================
 
   // Older versions of Fresh merged the `Deno.ServeTlsOptions` directly.
   // We've moved this to `server`.
@@ -161,7 +169,15 @@ export interface ResolvedFreshConfig {
   plugins: Plugin[];
   staticDir: string;
   router?: RouterOptions;
-  server: Partial<Deno.ServeTlsOptions>;
+  // =============================================================================
+  // MODIFICATIONS START
+  // =============================================================================
+  // server: Partial<Deno.ServeTlsOptions>;
+  // deno-lint-ignore no-explicit-any
+  server: any;
+  // =============================================================================
+  // MODIFICATIONS END
+  // =============================================================================
   basePath: string;
 }
 
