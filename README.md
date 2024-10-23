@@ -99,8 +99,12 @@ You can get data from a session in a similar way:
 **`./routes/profile.tsx`**
 
 ```tsx
-import { page, PageProps } from "fresh";
-import { define } from "../utils.ts";
+import { Handlers, PageProps } from "$fresh/server.ts";
+import { Session } from "@5t111111/fresh-session";
+
+interface State {
+  session: Session;
+}
 
 export const handler: Handlers<any, State> = {
   async GET(_req, ctx) {
@@ -119,7 +123,7 @@ export const handler: Handlers<any, State> = {
     // the user ID stored in the session.
     const user = await findUserById(userId);
 
-    return page({
+    return ctx.render({
       user,
     });
   },
